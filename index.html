@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title> Développement d'application géospatiale</title>
+		<script type="text/javascript" src="d3.v3.js"></script>
+	</head>
+	<body>
+		<script type="text/javascript">
+			var w = "900";
+			var h ="550";
+			var center;
+			var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", w)
+                    .attr("height", h)
+			//Define map projection
+			var proj;						
+			draw();
+			function draw(){
+				d3.json("usthbBrut.json", function(json) {
+					center = d3.geo.centroid(json);
+					var scale  = 10300000;
+                    proj = d3.geo.mercator().scale(scale);
+					// create the path
+                    path = d3.geo.path().projection(proj);
+					//the D3 Geo Path Data Generator
+					// new projection
+                    proj = d3.geo.mercator()
+					.center(center)
+                    .scale(scale);
+                    path = path.projection(proj);
+                    ///
+                    var country=svg.selectAll("path").data(json.features)
+					country
+                        .enter()
+                        .append("path")
+                        .attr("d", path)
+                        .attr("title",(e)=>{return e.properties.name})
+                        .attr("fill",(e)=>e.properties.fill!=="" ? e.properties.fill :"#0FA5A3")
+                        // .attr("stroke","#0F000C")
+                        .attr("opacity",(e)=>e.properties.opacity)
+                    var id=0;
+                    console.log(country)
+                    var imgSize=20;
+                    country.each((d)=>{
+                        var centroid=path.centroid(d);
+                        if(d.properties.icon!=''){
+                            svg.append("image")
+                                .attr('id','id'+1)
+                                .attr("xlink:href",d.properties.icon)
+                                // .attr("src",(e)=>{return e.properties.icon})
+                                .attr("width",imgSize)
+                                .attr("height",imgSize)
+                                .attr('x',(e)=>{return centroid[0]})
+                                .attr('y',(e)=>{return centroid[1]})
+                                .attr('transform','translate('+(-imgSize/2)+','+(-imgSize/2)+')')
+                        }
+                    })
+                })
+            }
+		</script>
+	</body>
+</html>
